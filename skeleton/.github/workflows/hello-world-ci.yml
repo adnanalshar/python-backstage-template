@@ -1,0 +1,33 @@
+name: Hello World CI
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  IMAGE_NAME: hello-world
+  AWS_REGION: eu-central-1
+  ECR_REPOSITORY: hello-world
+
+jobs:
+
+  container_build_scan:
+    name: Container build and scanning
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Build image
+      id: build-image
+      env:
+        IMAGE_TAG: ${{ github.run_id }}
+      run: |
+        docker build -t adnansh92/public-registry:python-hello-world-$IMAGE_TAG .
+
+    - name: Run Trivy container scanning
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: adnansh92/public-registry:python-hello-world-${{ github.run_id }}
